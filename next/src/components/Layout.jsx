@@ -8,7 +8,7 @@ export default function Layout({ children }) {
         {children}
       </main>
       <footer className="bg-gray-900 text-gray-400 text-sm text-center py-4">
-        BBC News Archive
+        BBC News Archive · <a href="https://samireland.com" className="text-gray-500 hover:text-gray-300 transition-colors">Sam Ireland</a>
       </footer>
     </div>
   );
