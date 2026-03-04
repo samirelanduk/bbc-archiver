@@ -78,7 +78,7 @@ export default function Search() {
               {results.map((result) => (
                 <Link
                   key={result.id}
-                  href={`/snapshots/${result.id}`}
+                  href={`/snapshot/${result.id}`}
                   className="block bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
                 >
                   <div className="flex gap-4">

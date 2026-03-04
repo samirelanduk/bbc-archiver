@@ -49,7 +49,7 @@ export default function Home() {
         <section className="mb-10">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Latest Snapshot</h1>
           <p className="text-sm text-gray-500 mb-4">{formatDate(latest.timestamp)}</p>
-          <a href={`/snapshots/${latest.id}`}>
+          <a href={`/snapshot/${latest.id}`}>
             <img
               src={`/snapshots/${latest.filename}`}
               alt="Latest BBC News snapshot"

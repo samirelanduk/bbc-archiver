@@ -30,6 +30,26 @@ def take_snapshot(self):
             browser = p.chromium.launch(headless=True)
             page = browser.new_page(viewport={"width": 1280, "height": 800})
             page.goto(BBC_URL, wait_until="networkidle", timeout=60000)
+
+            # Dismiss cookie consent banner if present
+            dismissed = False
+            for label in ["Yes, I agree", "Accept additional cookies", "Accept all cookies", "Accept cookies", "Accept all"]:
+                try:
+                    btn = page.get_by_role("button", name=label)
+                    btn.click(timeout=2000)
+                    dismissed = True
+                    break
+                except Exception:
+                    continue
+            if not dismissed:
+                # Fallback: remove any cookie/consent overlays from the DOM
+                page.evaluate("""
+                    for (const el of document.querySelectorAll('[id*="cookie"], [id*="consent"], [class*="cookie"], [class*="consent"]')) {
+                        el.remove();
+                    }
+                """)
+            page.wait_for_timeout(1000)
+
             page.screenshot(path=filepath, full_page=True)
             html = page.content()
             browser.close()

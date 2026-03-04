@@ -52,7 +52,7 @@ export default function SnapshotDetail() {
         <div className="flex gap-3">
           {snapshot.prev && (
             <Link
-              href={`/snapshots/${snapshot.prev}`}
+              href={`/snapshot/${snapshot.prev}`}
               className="px-4 py-2 text-sm rounded-md bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
             >
               &larr; Previous
@@ -60,7 +60,7 @@ export default function SnapshotDetail() {
           )}
           {snapshot.next && (
             <Link
-              href={`/snapshots/${snapshot.next}`}
+              href={`/snapshot/${snapshot.next}`}
               className="px-4 py-2 text-sm rounded-md bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
             >
               Next &rarr;

@@ -3,7 +3,7 @@ import { formatDateShort } from "@/lib/api";
 
 export default function SnapshotCard({ snapshot }) {
   return (
-    <Link href={`/snapshots/${snapshot.id}`} className="group block">
+    <Link href={`/snapshot/${snapshot.id}`} className="group block">
       <div className="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 hover:shadow-md transition-shadow">
         <div className="aspect-[4/3] overflow-hidden bg-gray-100">
           <img
