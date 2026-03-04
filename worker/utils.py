@@ -28,12 +28,41 @@ def ensure_index(es):
         )
 
 
+import re
+
+# Lines matching any of these patterns are removed from extracted text
+NOISE_PATTERNS = [
+    re.compile(r"^\d+\s*(hrs?|hours?|mins?|minutes?|secs?|seconds?|days?)\s+ago$", re.IGNORECASE),
+    re.compile(r"^posted\b", re.IGNORECASE),
+    re.compile(r"^updated\b", re.IGNORECASE),
+    re.compile(r"^(just now|live)$", re.IGNORECASE),
+    re.compile(r"cookie", re.IGNORECASE),
+    re.compile(r"consent", re.IGNORECASE),
+    re.compile(r"privacy", re.IGNORECASE),
+    re.compile(r"^skip to", re.IGNORECASE),
+    re.compile(r"^(share|copy link|close)$", re.IGNORECASE),
+    re.compile(r"^(sign in|register|log in|subscribe)$", re.IGNORECASE),
+    re.compile(r"^(bbc homepage|home)$", re.IGNORECASE),
+]
+
+
+def is_noise(line):
+    if len(line) < 3:
+        return True
+    return any(p.search(line) for p in NOISE_PATTERNS)
+
+
 def extract_text(html):
     soup = BeautifulSoup(html, "lxml")
-    for tag in soup(["script", "style", "nav", "footer", "noscript", "svg", "iframe"]):
+    for tag in soup(["script", "style", "nav", "footer", "noscript", "svg",
+                      "iframe", "header", "aside", "form", "button"]):
         tag.decompose()
+    # Remove cookie/consent related elements by attribute
+    for el in soup.select('[id*="cookie"], [id*="consent"], [class*="cookie"], [class*="consent"]'):
+        el.decompose()
     text = soup.get_text(separator="\n", strip=True)
     lines = [line.strip() for line in text.splitlines() if line.strip()]
+    lines = [line for line in lines if not is_noise(line)]
     return "\n".join(lines)
 
 
