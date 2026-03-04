@@ -50,6 +50,21 @@ def take_snapshot(self):
                 """)
             page.wait_for_timeout(1000)
 
+            # Scroll down the page to trigger lazy-loaded images
+            page.evaluate("""
+                async () => {
+                    const delay = ms => new Promise(r => setTimeout(r, ms));
+                    const height = document.body.scrollHeight;
+                    const step = window.innerHeight;
+                    for (let y = 0; y < height; y += step) {
+                        window.scrollTo(0, y);
+                        await delay(300);
+                    }
+                    window.scrollTo(0, 0);
+                }
+            """)
+            page.wait_for_timeout(2000)
+
             page.screenshot(path=filepath, full_page=True)
             html = page.content()
             browser.close()
