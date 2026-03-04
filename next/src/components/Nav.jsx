@@ -10,7 +10,7 @@ export default function Nav() {
             BBC News Archive
           </Link>
           <div className="flex items-center gap-6">
-            <Link href="/" className="text-sm text-gray-300 hover:text-white transition-colors">
+            <Link href="/browse" className="text-sm text-gray-300 hover:text-white transition-colors">
               Browse
             </Link>
             <SearchBar />
