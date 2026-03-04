@@ -65,6 +65,9 @@ def take_snapshot(self):
             """)
             page.wait_for_timeout(2000)
 
+            # Move mouse away so no link appears hovered
+            page.mouse.move(0, 0)
+
             page.screenshot(path=filepath, full_page=True)
             html = page.content()
             browser.close()
