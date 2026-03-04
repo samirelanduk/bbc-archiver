@@ -6,7 +6,7 @@ services:
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
     volumes:
-      - ./snapshots:/app/public/snapshots:ro
+      - ./snapshots:/data/snapshots:ro
     depends_on:
       elasticsearch:
         condition: service_healthy
