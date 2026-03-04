@@ -2,7 +2,7 @@ services:
   next:
     build: ./next
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
     volumes:
