@@ -33,7 +33,7 @@ services:
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
-      - SNAPSHOT_INTERVAL_SECONDS=${SNAPSHOT_INTERVAL_SECONDS:-120}
+      - SNAPSHOT_INTERVAL_MINUTES=${SNAPSHOT_INTERVAL_MINUTES:-2}
     depends_on:
       rabbitmq:
         condition: service_healthy
