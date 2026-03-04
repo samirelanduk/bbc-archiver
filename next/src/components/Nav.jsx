@@ -13,9 +13,6 @@ export default function Nav() {
             <Link href="/" className="text-sm text-gray-300 hover:text-white transition-colors">
               Browse
             </Link>
-            <Link href="/search" className="text-sm text-gray-300 hover:text-white transition-colors">
-              Search
-            </Link>
             <SearchBar />
           </div>
         </div>
