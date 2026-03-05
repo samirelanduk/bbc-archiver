@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import { getSnapshot, getAllSnapshotIds } from "@/lib/elasticsearch";
@@ -18,7 +17,7 @@ export async function getStaticPaths() {
 
 export async function getStaticProps({ params }) {
   try {
-    const snapshot = await getSnapshot(params.id);
+    const { text_content, ...snapshot } = await getSnapshot(params.id);
     return { props: { snapshot }, revalidate: false };
   } catch (error) {
     if (error.meta?.statusCode === 404) {
@@ -29,8 +28,6 @@ export async function getStaticProps({ params }) {
 }
 
 export default function SnapshotDetail({ snapshot }) {
-  const [showText, setShowText] = useState(false);
-
   if (!snapshot) {
     return (
       <Layout>
@@ -78,19 +75,6 @@ export default function SnapshotDetail({ snapshot }) {
         className="w-full rounded-lg shadow-md border border-gray-200 mb-6"
       />
 
-      <div>
-        <button
-          onClick={() => setShowText(!showText)}
-          className="text-sm text-blue-600 hover:text-blue-800 transition-colors mb-4"
-        >
-          {showText ? "Hide" : "Show"} extracted text
-        </button>
-        {showText && (
-          <div className="prose prose-sm max-w-none bg-white rounded-lg border border-gray-200 p-6 whitespace-pre-wrap text-gray-700">
-            {snapshot.text_content}
-          </div>
-        )}
-      </div>
     </Layout>
   );
 }
