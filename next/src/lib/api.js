@@ -1,3 +1,17 @@
+export function sanitizeHighlight(html) {
+  if (!html) return null;
+  // Escape everything, then restore only <mark> and </mark>
+  const escaped = html
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+  return escaped
+    .replace(/&lt;mark&gt;/g, "<mark>")
+    .replace(/&lt;\/mark&gt;/g, "</mark>");
+}
+
 export async function searchSnapshots(query, page = 1) {
   const params = new URLSearchParams({ q: query, page });
   const res = await fetch(`/api/search?${params}`);

@@ -4,7 +4,7 @@ import Link from "next/link";
 import Layout from "@/components/Layout";
 import Pagination from "@/components/Pagination";
 import { getSnapshots } from "@/lib/elasticsearch";
-import { searchSnapshots, formatDate, formatDateShort } from "@/lib/api";
+import { searchSnapshots, sanitizeHighlight, formatDate, formatDateShort } from "@/lib/api";
 
 export async function getStaticProps() {
   try {
@@ -86,7 +86,7 @@ export default function Home({ latest }) {
                         {result.highlight && (
                           <p
                             className="text-sm text-gray-600 line-clamp-3"
-                            dangerouslySetInnerHTML={{ __html: result.highlight }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeHighlight(result.highlight) }}
                           />
                         )}
                       </div>
