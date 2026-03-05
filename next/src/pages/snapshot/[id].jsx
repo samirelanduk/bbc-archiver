@@ -1,32 +1,35 @@
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useState } from "react";
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { fetchSnapshot, formatDate } from "@/lib/api";
+import { getSnapshot, getAllSnapshotIds } from "@/lib/elasticsearch";
+import { formatDate } from "@/lib/api";
 
-export default function SnapshotDetail() {
-  const router = useRouter();
-  const { id } = router.query;
-  const [snapshot, setSnapshot] = useState(null);
-  const [showText, setShowText] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    fetchSnapshot(id)
-      .then(setSnapshot)
-      .catch(() => console.error("Failed to load snapshot"))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  if (loading) {
-    return (
-      <Layout>
-        <p className="text-gray-500 text-center py-12">Loading...</p>
-      </Layout>
-    );
+export async function getStaticPaths() {
+  try {
+    const ids = await getAllSnapshotIds();
+    return {
+      paths: ids.map((id) => ({ params: { id } })),
+      fallback: "blocking",
+    };
+  } catch {
+    return { paths: [], fallback: "blocking" };
   }
+}
+
+export async function getStaticProps({ params }) {
+  try {
+    const snapshot = await getSnapshot(params.id);
+    return { props: { snapshot }, revalidate: false };
+  } catch (error) {
+    if (error.meta?.statusCode === 404) {
+      return { notFound: true };
+    }
+    return { props: { snapshot: null }, revalidate: false };
+  }
+}
+
+export default function SnapshotDetail({ snapshot }) {
+  const [showText, setShowText] = useState(false);
 
   if (!snapshot) {
     return (
@@ -39,7 +42,7 @@ export default function SnapshotDetail() {
   return (
     <Layout>
       <div className="mb-6">
-        <Link href="/" className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+        <Link href="/browse" className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
           &larr; Back to archive
         </Link>
       </div>

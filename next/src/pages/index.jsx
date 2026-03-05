@@ -1,66 +1,50 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import Layout from "@/components/Layout";
 import Pagination from "@/components/Pagination";
-import { fetchSnapshots, searchSnapshots, formatDate, formatDateShort } from "@/lib/api";
+import { getSnapshots } from "@/lib/elasticsearch";
+import { searchSnapshots, formatDate, formatDateShort } from "@/lib/api";
 
-export default function Home() {
+export async function getStaticProps() {
+  try {
+    const data = await getSnapshots({ page: 1, limit: 1 });
+    return {
+      props: { latest: data.snapshots[0] || null },
+      revalidate: false,
+    };
+  } catch {
+    return { props: { latest: null }, revalidate: 60 };
+  }
+}
+
+export default function Home({ latest }) {
   const router = useRouter();
   const searchQuery = router.query.q || "";
 
-  const [latest, setLatest] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  // Search state
   const [searchResults, setSearchResults] = useState([]);
   const [searchTotal, setSearchTotal] = useState(0);
   const [searchTotalPages, setSearchTotalPages] = useState(1);
   const [searchPage, setSearchPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setSearchPage(1);
   }, [searchQuery]);
 
-  // Load latest snapshot
-  const loadLatest = useCallback(async () => {
-    if (searchQuery) return;
-    setLoading(true);
-    try {
-      const data = await fetchSnapshots({ page: 1, limit: 1 });
-      setLatest(data.snapshots[0] || null);
-    } catch {
-      console.error("Failed to load latest snapshot");
-    } finally {
-      setLoading(false);
-    }
-  }, [searchQuery]);
-
-  // Load search results
-  const loadSearch = useCallback(async () => {
+  useEffect(() => {
     if (!searchQuery) return;
     setLoading(true);
-    try {
-      const data = await searchSnapshots(searchQuery, searchPage);
-      setSearchResults(data.results);
-      setSearchTotal(data.total);
-      setSearchTotalPages(data.totalPages);
-    } catch {
-      console.error("Search failed");
-    } finally {
-      setLoading(false);
-    }
+    searchSnapshots(searchQuery, searchPage)
+      .then((data) => {
+        setSearchResults(data.results);
+        setSearchTotal(data.total);
+        setSearchTotalPages(data.totalPages);
+      })
+      .catch(() => console.error("Search failed"))
+      .finally(() => setLoading(false));
   }, [searchQuery, searchPage]);
 
-  useEffect(() => {
-    if (searchQuery) {
-      loadSearch();
-    } else {
-      loadLatest();
-    }
-  }, [loadLatest, loadSearch, searchQuery]);
-
-  // Search results view
   if (searchQuery) {
     return (
       <Layout>
@@ -118,12 +102,9 @@ export default function Home() {
     );
   }
 
-  // Home view - latest snapshot
   return (
     <Layout>
-      {loading ? (
-        <p className="text-gray-500 text-center py-12">Loading...</p>
-      ) : latest ? (
+      {latest ? (
         <section>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Latest Snapshot</h1>
           <p className="text-sm text-gray-500 mb-4">{formatDate(latest.timestamp)}</p>

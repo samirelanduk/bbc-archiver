@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timezone
 
+import requests
 from celery import Celery
 from PIL import Image
 from playwright.sync_api import sync_playwright
@@ -13,6 +14,7 @@ app.config_from_object("celeryconfig")
 SNAPSHOTS_DIR = "/snapshots"
 BBC_URL = "https://www.bbc.co.uk/news"
 THUMB_WIDTH = 400
+NEXT_URL = os.environ.get("NEXT_URL", "http://next:3000")
 
 
 @app.task(bind=True, max_retries=3, default_retry_delay=30)
@@ -83,7 +85,14 @@ def take_snapshot(self):
         text_content = extract_text(html)
         es = get_es_client()
         iso_ts = now.isoformat()
+        doc_id = iso_ts.replace(":", "-").replace(".", "-")
         index_snapshot(es, iso_ts, filename, thumb_filename, text_content, BBC_URL)
+
+        # Trigger Next.js to regenerate static pages
+        try:
+            requests.post(f"{NEXT_URL}/api/revalidate", json={"snapshotId": doc_id}, timeout=10)
+        except Exception as e:
+            print(f"Revalidation request failed: {e}")
 
         print(f"Snapshot saved: {filename}")
         return {"filename": filename, "timestamp": iso_ts}
