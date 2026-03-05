@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: "/snapshots/:path*",
-        destination: "/api/images/:path*",
+        destination: "http://nginx:80/snapshots/:path*",
       },
     ];
   },
