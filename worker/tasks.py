@@ -15,6 +15,7 @@ SNAPSHOTS_DIR = "/snapshots"
 BBC_URL = "https://www.bbc.co.uk/news"
 THUMB_WIDTH = 400
 NEXT_URL = os.environ.get("NEXT_URL", "http://next:3000")
+REVALIDATION_SECRET = os.environ.get("REVALIDATION_SECRET", "")
 
 
 @app.task(bind=True, max_retries=3, default_retry_delay=30)
@@ -90,7 +91,7 @@ def take_snapshot(self):
 
         # Trigger Next.js to regenerate static pages
         try:
-            requests.post(f"{NEXT_URL}/api/revalidate", json={"snapshotId": doc_id}, timeout=10)
+            requests.post(f"{NEXT_URL}/api/revalidate", json={"snapshotId": doc_id}, headers={"X-Revalidation-Secret": REVALIDATION_SECRET}, timeout=10)
         except Exception as e:
             print(f"Revalidation request failed: {e}")
 

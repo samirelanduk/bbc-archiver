@@ -5,6 +5,7 @@ services:
       - "${PORT:-3000}:3000"
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
+      - REVALIDATION_SECRET=${REVALIDATION_SECRET:-default-secret-change-me}
     volumes:
       - ./snapshots:/data/snapshots:ro
     depends_on:
@@ -18,6 +19,7 @@ services:
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
+      - REVALIDATION_SECRET=${REVALIDATION_SECRET:-default-secret-change-me}
     volumes:
       - ./snapshots:/snapshots
     depends_on:
