@@ -39,7 +39,7 @@ export default function SnapshotDetail({ snapshot }) {
   return (
     <Layout>
       <div className="mb-6">
-        <Link href="/browse" className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+        <Link href="/browse" className="text-sm text-teal-600 hover:text-teal-700 transition-colors">
           &larr; Back to archive
         </Link>
       </div>

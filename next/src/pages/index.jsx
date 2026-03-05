@@ -9,9 +9,10 @@ import { searchSnapshots, formatDate, formatDateShort } from "@/lib/api";
 export async function getStaticProps() {
   try {
     const data = await getSnapshots({ page: 1, limit: 1 });
+    const latest = data.snapshots[0] || null;
     return {
-      props: { latest: data.snapshots[0] || null },
-      revalidate: false,
+      props: { latest },
+      revalidate: latest ? false : 60,
     };
   } catch {
     return { props: { latest: null }, revalidate: 60 };
@@ -49,7 +50,7 @@ export default function Home({ latest }) {
     return (
       <Layout>
         <div className="mb-6">
-          <Link href="/" className="text-sm text-blue-600 hover:text-blue-800 transition-colors">
+          <Link href="/" className="text-sm text-teal-600 hover:text-teal-700 transition-colors">
             &larr; Back to archive
           </Link>
         </div>
