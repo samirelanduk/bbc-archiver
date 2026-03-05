@@ -4,9 +4,9 @@ import path from "path";
 const SNAPSHOTS_DIR = "/data/snapshots";
 
 export default function handler(req, res) {
-  const filePath = path.join(SNAPSHOTS_DIR, ...req.query.path);
+  const filePath = path.resolve(SNAPSHOTS_DIR, ...req.query.path);
 
-  if (!filePath.startsWith(SNAPSHOTS_DIR)) {
+  if (!filePath.startsWith(SNAPSHOTS_DIR + "/")) {
     return res.status(403).end();
   }
 
