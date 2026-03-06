@@ -1,0 +1,9 @@
+services:
+  nginx:
+    ports:
+      - "${PORT}:80"
+    volumes:
+      - ./snapshots:/data/snapshots:ro
+  worker:
+    volumes:
+      - ./snapshots:/snapshots

@@ -3,5 +3,6 @@ node_modules/
 /snapshots/
 elasticsearch/
 .env
+secrets.env
 *.pyc
 __pycache__/
