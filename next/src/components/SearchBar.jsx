@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 
-export default function SearchBar() {
+export default function SearchBar({ onSubmit }) {
   const [query, setQuery] = useState("");
   const router = useRouter();
 
@@ -9,6 +9,7 @@ export default function SearchBar() {
     e.preventDefault();
     if (query.trim()) {
       router.push(`/?q=${encodeURIComponent(query.trim())}`);
+      onSubmit?.();
     }
   }
 
@@ -19,7 +20,7 @@ export default function SearchBar() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="Search snapshots..."
-        className="px-3 py-1.5 rounded-l-md text-sm text-gray-900 bg-slate-100 border-0 focus:ring-2 focus:ring-teal-500 focus:outline-none w-48"
+        className="px-3 py-1.5 rounded-l-md text-sm text-gray-900 bg-slate-100 border-0 focus:ring-2 focus:ring-teal-500 focus:outline-none w-48 sm:w-48"
       />
       <button
         type="submit"
