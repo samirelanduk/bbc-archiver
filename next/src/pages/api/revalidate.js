@@ -1,5 +1,5 @@
 const REVALIDATION_SECRET = process.env.REVALIDATION_SECRET;
-const SNAPSHOT_ID_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}[A-Za-z0-9+.\-]*$/;
+const SNAPSHOT_ID_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}-\d{2}$/;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {

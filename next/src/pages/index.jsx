@@ -12,7 +12,7 @@ export async function getStaticProps() {
     const latest = data.snapshots[0] || null;
     return {
       props: { latest },
-      revalidate: latest ? false : 60,
+      revalidate: false,
     };
   } catch {
     return { props: { latest: null }, revalidate: 60 };

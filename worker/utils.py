@@ -68,7 +68,7 @@ def extract_text(html):
 
 def index_snapshot(es, timestamp, filename, thumb_filename, text_content, url):
     ensure_index(es)
-    doc_id = timestamp.replace(":", "-").replace(".", "-")
+    doc_id = filename.replace(".png", "")
     es.index(
         index=INDEX_NAME,
         id=doc_id,
@@ -79,4 +79,5 @@ def index_snapshot(es, timestamp, filename, thumb_filename, text_content, url):
             "url": url,
             "text_content": text_content,
         },
+        refresh="wait_for",
     )

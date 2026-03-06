@@ -22,7 +22,7 @@ REVALIDATION_SECRET = os.environ.get("REVALIDATION_SECRET", "")
 def take_snapshot(self):
     os.makedirs(SNAPSHOTS_DIR, exist_ok=True)
     now = datetime.now(timezone.utc)
-    ts = now.strftime("%Y-%m-%dT%H-%M-%S")
+    ts = now.strftime("%Y-%m-%dT%H-%M")
     filename = f"{ts}.png"
     thumb_filename = f"{ts}_thumb.png"
     filepath = os.path.join(SNAPSHOTS_DIR, filename)
@@ -72,13 +72,12 @@ def take_snapshot(self):
         # Extract text and index
         text_content = extract_text(html)
         es = get_es_client()
-        iso_ts = now.isoformat()
-        doc_id = iso_ts.replace(":", "-").replace(".", "-")
+        iso_ts = now.strftime("%Y-%m-%dT%H:%M:00Z")
         index_snapshot(es, iso_ts, filename, thumb_filename, text_content, BBC_URL)
 
         # Trigger Next.js to regenerate static pages
         try:
-            requests.post(f"{NEXT_URL}/api/revalidate", json={"snapshotId": doc_id}, headers={"X-Revalidation-Secret": REVALIDATION_SECRET}, timeout=10)
+            requests.post(f"{NEXT_URL}/api/revalidate", json={"snapshotId": ts}, headers={"X-Revalidation-Secret": REVALIDATION_SECRET}, timeout=10)
         except Exception as e:
             print(f"Revalidation request failed: {e}")
 
