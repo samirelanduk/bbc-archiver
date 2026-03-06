@@ -31,27 +31,14 @@ def take_snapshot(self):
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
-            page = browser.new_page(viewport={"width": 1280, "height": 800})
+            context = browser.new_context(viewport={"width": 1280, "height": 800})
+            context.add_cookies([
+                {"name": "ckns_policy", "value": "111", "domain": ".bbc.co.uk", "path": "/"},
+                {"name": "ckns_explicit", "value": "1", "domain": ".bbc.co.uk", "path": "/"},
+                {"name": "ckns_privacy", "value": "1", "domain": ".bbc.co.uk", "path": "/"},
+            ])
+            page = context.new_page()
             page.goto(BBC_URL, wait_until="networkidle", timeout=60000)
-
-            # Dismiss cookie consent banner if present
-            dismissed = False
-            for label in ["Yes, I agree", "Accept additional cookies", "Accept all cookies", "Accept cookies", "Accept all"]:
-                try:
-                    btn = page.get_by_role("button", name=label)
-                    btn.click(timeout=2000)
-                    dismissed = True
-                    break
-                except Exception:
-                    continue
-            if not dismissed:
-                # Fallback: remove any cookie/consent overlays from the DOM
-                page.evaluate("""
-                    for (const el of document.querySelectorAll('[id*="cookie"], [id*="consent"], [class*="cookie"], [class*="consent"]')) {
-                        el.remove();
-                    }
-                """)
-            page.wait_for_timeout(1000)
 
             # Scroll down the page to trigger lazy-loaded images
             page.evaluate("""
