@@ -6,6 +6,7 @@ export default function App({ Component, pageProps }) {
   return (
     <>
       <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <title>BBC News Archive</title>
       </Head>
