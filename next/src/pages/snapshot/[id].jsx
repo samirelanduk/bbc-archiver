@@ -1,29 +1,17 @@
 import Link from "next/link";
 import Layout from "@/components/Layout";
-import { getSnapshot, getAllSnapshotIds } from "@/lib/elasticsearch";
+import { getSnapshot } from "@/lib/elasticsearch";
 import { formatDate } from "@/lib/api";
 
-export async function getStaticPaths() {
-  try {
-    const ids = await getAllSnapshotIds();
-    return {
-      paths: ids.map((id) => ({ params: { id } })),
-      fallback: "blocking",
-    };
-  } catch {
-    return { paths: [], fallback: "blocking" };
-  }
-}
-
-export async function getStaticProps({ params }) {
+export async function getServerSideProps({ params }) {
   try {
     const { text_content, ...snapshot } = await getSnapshot(params.id);
-    return { props: { snapshot }, revalidate: false };
+    return { props: { snapshot } };
   } catch (error) {
     if (error.meta?.statusCode === 404) {
       return { notFound: true };
     }
-    return { props: { snapshot: null }, revalidate: false };
+    return { props: { snapshot: null } };
   }
 }
 

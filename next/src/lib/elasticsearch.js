@@ -78,24 +78,6 @@ export async function getSnapshot(id) {
   return snapshot;
 }
 
-export async function getAllSnapshotIds() {
-  try {
-    const result = await es.search({
-      index: "snapshots",
-      body: {
-        query: { match_all: {} },
-        sort: [{ timestamp: { order: "desc" } }],
-        size: 10000,
-        _source: false,
-      },
-    });
-    return result.hits.hits.map((hit) => hit._id);
-  } catch (error) {
-    if (error.meta?.statusCode === 404) return [];
-    throw error;
-  }
-}
-
 export async function searchIndex(q, page = 1, limit = 20) {
   const pageNum = Math.max(1, parseInt(page));
   const limitNum = Math.min(100, Math.max(1, parseInt(limit)));

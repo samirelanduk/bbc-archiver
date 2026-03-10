@@ -6,16 +6,13 @@ import Pagination from "@/components/Pagination";
 import { getSnapshots } from "@/lib/elasticsearch";
 import { searchSnapshots, sanitizeHighlight, formatDate, formatDateShort } from "@/lib/api";
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   try {
     const data = await getSnapshots({ page: 1, limit: 1 });
     const latest = data.snapshots[0] || null;
-    return {
-      props: { latest },
-      revalidate: false,
-    };
+    return { props: { latest } };
   } catch {
-    return { props: { latest: null }, revalidate: 60 };
+    return { props: { latest: null } };
   }
 }
 

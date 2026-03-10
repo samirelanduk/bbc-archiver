@@ -30,7 +30,6 @@ docker compose --progress=plain -p $PROJECT build && \
     docker compose -p $PROJECT push && \
     ssh $DOMAIN "mkdir -p ~/$DOMAIN" && \
     scp docker-compose.yml $DOMAIN:~/$DOMAIN/docker-compose.yml && \
-    scp secrets.env $DOMAIN:~/$DOMAIN/secrets.env && \
     ssh $DOMAIN "cd ~/$DOMAIN && TAG=$TAG HOSTNAME=$HOSTNAME SNAPSHOT_INTERVAL_MINUTES=$SNAPSHOT_INTERVAL_MINUTES docker compose -p $PROJECT pull" && \
     ssh $DOMAIN "cd ~/$DOMAIN && TAG=$TAG HOSTNAME=$HOSTNAME SNAPSHOT_INTERVAL_MINUTES=$SNAPSHOT_INTERVAL_MINUTES docker compose -p $PROJECT up -d" && \
     ssh $DOMAIN "docker network connect bridge ${PROJECT}-nginx-1 2>/dev/null || true" && \

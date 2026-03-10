@@ -5,8 +5,6 @@ services:
     build: ./next
     expose:
       - 3000
-    env_file:
-      - secrets.env
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
     depends_on:
@@ -32,8 +30,6 @@ services:
     image: samirelanduk/bbc-news-archive-worker:${TAG}
     build: ./worker
     command: celery -A tasks worker --loglevel=info
-    env_file:
-      - secrets.env
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672//
