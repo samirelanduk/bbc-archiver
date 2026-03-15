@@ -35,7 +35,18 @@ def take_snapshot(self):
                 {"name": "ckns_privacy", "value": "1", "domain": ".bbc.co.uk", "path": "/"},
             ])
             page = context.new_page()
+            page.route("**/bundle*sign-in*", lambda route: route.abort())
             page.goto(BBC_URL, wait_until="networkidle", timeout=60000)
+
+            # Remove sign-in banners and reclaim their layout space
+            page.evaluate("""
+                () => {
+                    document.documentElement.classList.remove('display-sign-in-banner');
+                    document.querySelectorAll(
+                        '[data-testid="sign-in-banner"], [data-testid="local-news-sign-in-banner"]'
+                    ).forEach(el => el.remove());
+                }
+            """)
 
             # Scroll down the page to trigger lazy-loaded images
             page.evaluate("""
