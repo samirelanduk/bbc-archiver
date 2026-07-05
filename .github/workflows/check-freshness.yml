@@ -1,0 +1,72 @@
+name: Check archive freshness
+
+on:
+  schedule:
+    - cron: "30 */2 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check latest snapshot age on home page
+        env:
+          HOME_URL: https://bbc.frontpagearchive.com
+          MAX_AGE_MINUTES: "45"
+        run: |
+          node <<'EOF'
+          const url = process.env.HOME_URL;
+          const maxAge = Number(process.env.MAX_AGE_MINUTES);
+
+          const res = await fetch(url);
+          if (!res.ok) {
+            console.error(`::error::Fetch failed: ${res.status} ${res.statusText}`);
+            process.exit(1);
+          }
+          const html = await res.text();
+
+          const m = html.match(
+            /([A-Z][a-z]+), (\d{1,2}) ([A-Z][a-z]+) (\d{4})(?: at |, )(\d{2}):(\d{2})/
+          );
+          if (!m) {
+            console.error("::error::Could not find latest snapshot date on home page");
+            process.exit(1);
+          }
+          const [full, , day, month, year, hh, mm] = m;
+
+          const months = ["January","February","March","April","May","June",
+                          "July","August","September","October","November","December"];
+          const monthIdx = months.indexOf(month);
+          if (monthIdx < 0) {
+            console.error(`::error::Unrecognised month "${month}" in "${full}"`);
+            process.exit(1);
+          }
+
+          // Wall-clock time is Europe/London; convert to UTC epoch by applying
+          // the London offset at that moment (handles BST/GMT automatically).
+          const guessMs = Date.UTC(+year, monthIdx, +day, +hh, +mm);
+          const parts = Object.fromEntries(
+            new Intl.DateTimeFormat("en-GB", {
+              timeZone: "Europe/London", hour12: false,
+              year: "numeric", month: "2-digit", day: "2-digit",
+              hour: "2-digit", minute: "2-digit",
+            }).formatToParts(new Date(guessMs)).map(p => [p.type, p.value])
+          );
+          const londonWallOfGuess = Date.UTC(
+            +parts.year, +parts.month - 1, +parts.day,
+            +parts.hour, +parts.minute
+          );
+          const offsetMs = londonWallOfGuess - guessMs;
+          const latestMs = guessMs - offsetMs;
+          const ageMin = Math.floor((Date.now() - latestMs) / 60000);
+
+          console.log(`Latest snapshot on home page: ${full}`);
+          console.log(`Age: ${ageMin} min (threshold: ${maxAge} min)`);
+
+          if (ageMin > maxAge) {
+            console.error(
+              `::error::Latest snapshot is ${ageMin} minutes old — worker may have failed`
+            );
+            process.exit(1);
+          }
+          EOF
