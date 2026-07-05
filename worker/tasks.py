@@ -1,5 +1,6 @@
 import os
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from celery import Celery
 from PIL import Image
@@ -13,12 +14,13 @@ app.config_from_object("celeryconfig")
 SNAPSHOTS_DIR = "/snapshots"
 BBC_URL = "https://www.bbc.co.uk/news"
 THUMB_WIDTH = 400
+LONDON = ZoneInfo("Europe/London")
 
 
 @app.task(bind=True, max_retries=3, default_retry_delay=30)
 def take_snapshot(self):
     os.makedirs(SNAPSHOTS_DIR, exist_ok=True)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(LONDON)
     ts = now.strftime("%Y-%m-%dT%H-%M")
     filename = f"{ts}.png"
     thumb_filename = f"{ts}_thumb.png"
@@ -80,7 +82,7 @@ def take_snapshot(self):
         # Extract text and index
         text_content = extract_text(html)
         es = get_es_client()
-        iso_ts = now.strftime("%Y-%m-%dT%H:%M:00Z")
+        iso_ts = now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:00Z")
         index_snapshot(es, iso_ts, filename, thumb_filename, text_content, BBC_URL)
 
         print(f"Snapshot saved: {filename}")

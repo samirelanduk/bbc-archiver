@@ -28,7 +28,7 @@ export function formatDate(timestamp) {
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "UTC",
+    timeZone: "Europe/London",
   });
 }
 
@@ -40,6 +40,6 @@ export function formatDateShort(timestamp) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    timeZone: "UTC",
+    timeZone: "Europe/London",
   });
 }
