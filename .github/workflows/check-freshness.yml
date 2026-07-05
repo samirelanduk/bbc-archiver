@@ -2,7 +2,7 @@ name: Check archive freshness
 
 on:
   schedule:
-    - cron: "30 */2 * * *"
+    - cron: "10 */2 * * *"
   workflow_dispatch:
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
       - name: Check latest snapshot age on home page
         env:
           HOME_URL: https://bbc.frontpagearchive.com
-          MAX_AGE_MINUTES: "45"
+          MAX_AGE_MINUTES: "100"
         run: |
           node <<'EOF'
           const url = process.env.HOME_URL;
