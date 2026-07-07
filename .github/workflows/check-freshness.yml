@@ -9,14 +9,14 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - name: Check latest snapshot age on home page
+      - name: Check latest snapshot matches expected slot
         env:
           HOME_URL: https://bbc.frontpagearchive.com
-          MAX_AGE_MINUTES: "100"
+          GRACE_MINUTES: "5"
         run: |
           node <<'EOF'
           const url = process.env.HOME_URL;
-          const maxAge = Number(process.env.MAX_AGE_MINUTES);
+          const graceMin = Number(process.env.GRACE_MINUTES);
 
           const res = await fetch(url);
           if (!res.ok) {
@@ -42,30 +42,40 @@ jobs:
             process.exit(1);
           }
 
-          // Wall-clock time is Europe/London; convert to UTC epoch by applying
-          // the London offset at that moment (handles BST/GMT automatically).
-          const guessMs = Date.UTC(+year, monthIdx, +day, +hh, +mm);
-          const parts = Object.fromEntries(
+          const londonParts = ms => Object.fromEntries(
             new Intl.DateTimeFormat("en-GB", {
               timeZone: "Europe/London", hour12: false,
               year: "numeric", month: "2-digit", day: "2-digit",
               hour: "2-digit", minute: "2-digit",
-            }).formatToParts(new Date(guessMs)).map(p => [p.type, p.value])
+            }).formatToParts(new Date(ms)).map(p => [p.type, p.value])
           );
-          const londonWallOfGuess = Date.UTC(
-            +parts.year, +parts.month - 1, +parts.day,
-            +parts.hour, +parts.minute
+
+          const londonWallToUtcMs = (y, mo, d, h, mi) => {
+            const guess = Date.UTC(y, mo, d, h, mi);
+            const p = londonParts(guess);
+            const wall = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+            return guess - (wall - guess);
+          };
+
+          const displayedMs = londonWallToUtcMs(+year, monthIdx, +day, +hh, +mm);
+
+          // Expected latest slot: most recent even London hour, backing off
+          // graceMin so we don't fail on a snapshot still being indexed.
+          const effective = londonParts(Date.now() - graceMin * 60 * 1000);
+          const eh = +effective.hour - (+effective.hour % 2);
+          const expectedMs = londonWallToUtcMs(
+            +effective.year, +effective.month - 1, +effective.day, eh, 0
           );
-          const offsetMs = londonWallOfGuess - guessMs;
-          const latestMs = guessMs - offsetMs;
-          const ageMin = Math.floor((Date.now() - latestMs) / 60000);
 
-          console.log(`Latest snapshot on home page: ${full}`);
-          console.log(`Age: ${ageMin} min (threshold: ${maxAge} min)`);
+          const pad = n => String(n).padStart(2, "0");
+          const expectedLondon = `${effective.year}-${effective.month}-${effective.day} ${pad(eh)}:00`;
+          console.log(`Displayed: ${full}`);
+          console.log(`Expected:  ${expectedLondon} London`);
 
-          if (ageMin > maxAge) {
+          if (displayedMs < expectedMs) {
+            const missedH = Math.round((expectedMs - displayedMs) / 3600000);
             console.error(
-              `::error::Latest snapshot is ${ageMin} minutes old — worker may have failed`
+              `::error::Displayed snapshot is ${missedH}h behind expected slot — worker may have failed`
             );
             process.exit(1);
           }
